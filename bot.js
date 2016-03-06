@@ -24,6 +24,7 @@ var controller = Botkit.slackbot({
 
 controller.setupWebserver(process.env.port,function(err,webserver) {
   controller.createWebhookEndpoints(controller.webserver);
+  
 
   controller.createOauthEndpoints(controller.webserver,function(err,req,res) {
     if (err) {
@@ -117,6 +118,23 @@ function formatUptime(uptime) {
 
 controller.hears(['.belate'],['direct_message,direct_mention,mention'],function(bot,message) {
   bot.startPrivateConversation(message, askPeriod);
+  var options = {
+      host: 'belated-runner.herokuapp.com',
+      port: '80',
+      path: '/angeloisgay',
+      method: 'GET',
+      
+  }
+  
+  var request = http.request(options, function(res) {
+      res.setEncoding('utf8')
+      res.on('data', function (chunk) {
+      console.log('Responce: ' + chunk);
+          bot.startPrivateConversation(chunk,function(){
+          })
+      })
+  })
+  
 });
 
 askPeriod = function(response, convo) {
@@ -144,7 +162,7 @@ confirmDeliver = function(response, convo) {
 
 	  if (convo.status=='completed') {
 	    // do something useful with the users responses
-	    var res = convo.extractResponses();
+	    var req = convo.extractResponses();
 
 	    // reference a specific response by key
 	    var period  = convo.extractResponse('key');
